@@ -5,6 +5,7 @@ import javafx.util.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import utils.OsUtils;
 
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class XmlDocToJavaTiny {
     private void processFlags(Node firstChild, GeneratorConfiguration configuration) {
         Node startNode = firstChild;
         while (startNode != null) {
-            if (startNode.getNodeName() == "#comment") {
+            if ("#comment".equals(startNode.getNodeName())) {
                 String commentValue = startNode.getNodeValue().trim();
                 configuration.isKotlinController = true;
             }
@@ -39,6 +40,13 @@ public class XmlDocToJavaTiny {
         JavaTiny result = new JavaTiny(
                 element.getTagName()
         );
+
+        if (element.hasChildNodes()) {
+            String text = element.getFirstChild().getTextContent();
+            if (!OsUtils.isNullOrEmpty(text.trim())) {
+                result.setInnerText(text);
+            }
+        }
         int attrLength = element.getAttributes().getLength();
         for (int i = 0; i < attrLength; i++) {
             Node attrNode = element.getAttributes().item(i);
@@ -59,7 +67,7 @@ public class XmlDocToJavaTiny {
 
     private void processImports(Node firstChild, List<String> importsList) {
         Node startNode = firstChild;
-        while (startNode != null && startNode.getNodeName() == "import") {
+        while (startNode != null && "import".equals(startNode.getNodeName())) {
             importsList.add(startNode.getNodeValue());
             startNode = startNode.getNextSibling();
         }
